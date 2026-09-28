@@ -14,46 +14,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-name: Azure Static Web Apps CI/CD
 
-on:
-  push:
-    branches:
-      - main  # nebo větev, kterou používáš (např. master)
-  pull_request:
-      types: [opened, synchronize, reopened, closed]
-      branches:
-      - main
-
-jobs:
-  build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
-    runs-on: ubuntu-latest
-    name: Build and Deploy Job
-    # Nutné pro OIDC autentizaci vůči Azure
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Authenticate to Azure (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Build And Deploy
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }} # Pokud ho vyžaduje, případně ho lze vynechat, pokud se přihlašuješ přes azure/login, ale Azure SWA šablony ho často chtějí. Záleží, jakou šablonu používáš.
-          # Nastavení cest v projektu (uprav podle sebe):
-          app_location: "/" # Cesta klientské appky (např. kořen nebo "/frontend")
-          api_location: "" # Cesta k API (pokud nějaké máš, např. "api")
-          output_location: "dist" # Výstupní složka po buildeu (např. "dist", "build", "public")
       - name: Azure Login
         uses: azure/login@v2
         with:

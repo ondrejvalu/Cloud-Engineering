@@ -20,20 +20,25 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="max-w-5xl mx-auto mt-8 md:mt-12 px-4 md:px-6">
+    <main class="max-w-5xl mx-auto mt-8 md:mt-12 px-4 md:px-6 mb-20">
         
         <!-- Hero Section -->
         <div class="text-center mb-12 md:mb-16">
             <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">Zero-Trust Ephemeral Workspace</h1>
-            <p class="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <p class="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed mb-10">
                 A showcase project demonstrating secure, identity-driven multi-cloud architecture. 
                 Combines Azure Entra ID, OpenID Connect (OIDC), and ephemeral computing on Scaleway 
                 to provide a strictly time-limited, browser-based session with zero standing privileges.
             </p>
+            
+            <!-- Architecture Diagram (Visible to all) -->
+            <div class="max-w-4xl mx-auto bg-white p-2 md:p-4 rounded-xl shadow-md border border-gray-200 transition-transform duration-300 hover:shadow-lg">
+                <img src="architecture.png" alt="Zero-Trust Architecture Diagram" class="w-full h-auto rounded-lg object-contain">
+            </div>
         </div>
 
         <!-- Interactive Dashboard (Visible after login) -->
-        <div id="dashboard" class="hidden bg-white p-6 md:p-8 rounded-lg shadow-md border border-gray-200 text-center">
+        <div id="dashboard" class="hidden bg-white p-6 md:p-8 rounded-xl shadow-md border border-gray-200 text-center">
             <h2 class="text-2xl font-bold mb-4">Workspace Control Panel</h2>
             <p class="text-gray-600 mb-6">
                 Authentication successful. You can now provision a temporary isolated environment. 
@@ -49,7 +54,7 @@
                 <!-- Backend logs will stream here -->
             </div>
             
-            <!-- Target container for Guacamole RDP/VNC -->
+            <!-- Target container for Guacamole RDP/VNC or AI Web UI -->
             <div id="vm-container" class="mt-8 hidden w-full h-[500px] md:h-[700px] border-2 border-gray-800 rounded bg-black overflow-hidden shadow-inner">
                 <iframe id="vm-frame" class="w-full h-full border-none" src=""></iframe>
             </div>
@@ -83,6 +88,7 @@
             statusBox.innerHTML = `
                 <p class='text-blue-600'>[INFO] Initiating API call to Azure Functions...</p>
                 <p class='text-gray-600'>[INFO] Orchestrating Scaleway instances via OIDC...</p>
+                <p class='text-gray-600'>[INFO] Deploying Local LLM & Web UI...</p>
                 <p class='text-gray-600'>[INFO] Setting up 20-minute termination timer...</p>
             `;
             

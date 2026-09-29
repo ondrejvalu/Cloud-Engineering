@@ -4,10 +4,6 @@
   },
   "routes": [
     {
-      "route": "/.auth/login/aad",
-      "statusCode": 200
-    },
-    {
       "route": "/api/*",
       "allowedRoles": ["authenticated"]
     }

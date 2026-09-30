@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # 1. Zero-Trust SSO Gateway
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:latest
+    container_name: showcase-sso-gateway
+    ports:
+      - "80:4180" # Only point of entry from the internet
+    command:
+      - --provider=oidc
+      - --client-id=${AZURE_CLIENT_ID}
+      - --client-secret=${AZURE_CLIENT_SECRET}
+      - --oidc-issuer-url=https://login.microsoftonline.com/${AZURE_TENANT_ID}/v2.0
+      - --upstream=http://webtop:3000
+      - --http-address=0.0.0.0:4180
+      - --cookie-secret=${COOKIE_SECRET}
+      - --email-domain=*
+      - --insecure-oidc-allow-unverified-email=true
+    restart: "no"
+
+  # 2. Ephemeral Linux Desktop (Webtop / KasmVNC)
+  webtop:
+    image: lscr.io/linuxserver/webtop:alpine-xfce
+    container_name: showcase-webtop
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    # Ports removed - accessible only via oauth2-proxy
+    shm_size: "1gb"
+    restart: "no"
+
+  # 3. Local AI Engine (Ollama)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: showcase-ollama
+    # Ports removed - strictly internal
+    restart: "no"
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["ollama serve & sleep 5 && ollama pull llama3.2:1b && wait"]
+
+  # 4. AI Web Interface (Open WebUI)
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: showcase-webui
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - WEBUI_AUTH=false
+    depends_on:
+      - ollama
+    # Ports removed - accessible only from within the Webtop container
+    restart: "no"

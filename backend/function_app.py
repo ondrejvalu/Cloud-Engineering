@@ -44,12 +44,18 @@ def StartSandbox(req: func.HttpRequest) -> func.HttpResponse:
 
     # 3. Create the Server on Scaleway 
     server_payload = {
-        "name": "showcase-ephemeral-sandbox",
-        "project": project_id,
-        "commercial_type": "DEV1-M",
-        "image": "ubuntu_jammy", # Standard Ubuntu 22.04 LTS
-        "tags": ["showcase-ephemeral"] # Crucial tag for the Budget Guard
+    "name": "showcase-ephemeral-sandbox",
+    "project": project_id,
+    "commercial_type": "DEV1-M",
+    "image": "ubuntu_jammy",
+    "tags": ["showcase-ephemeral"],
+    "volumes": {
+        "0": {
+            "size": 50 * 1000 * 1000 * 1000,  # 50 GB
+            "volume_type": "b_ssd"
+        }
     }
+}
     
     create_res = requests.post(f"{SCW_API_URL}/servers", headers=headers, json=server_payload)
     if create_res.status_code not in (200, 201):

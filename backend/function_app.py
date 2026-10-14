@@ -52,7 +52,7 @@ def StartSandbox(req: func.HttpRequest) -> func.HttpResponse:
     "volumes": {
         "0": {
             "size": 50 * 1000 * 1000 * 1000,  # 50 GB
-            "volume_type": "b_ssd"
+            "volume_type": "sbs_volume"
         }
     }
 }

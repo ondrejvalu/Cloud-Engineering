@@ -1,53 +1,50 @@
-version: '3.8'
-
 services:
-  # 1. Zero-Trust SSO Gateway
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:latest
     container_name: showcase-sso-gateway
     ports:
-      - "80:4180" # Only point of entry from the internet
-    command:
-      - --provider=oidc
-      - --client-id=${AZURE_CLIENT_ID}
-      - --client-secret=${AZURE_CLIENT_SECRET}
-      - --oidc-issuer-url=https://login.microsoftonline.com/${AZURE_TENANT_ID}/v2.0
-      - --upstream=http://webtop:3000
-      - --http-address=0.0.0.0:4180
-      - --cookie-secret=${COOKIE_SECRET}
-      - --email-domain=*
-      - --insecure-oidc-allow-unverified-email=true
-    restart: "no"
+      - "80:4180"
+    environment:
+      - OAUTH2_PROXY_PROVIDER=oidc
+      - OAUTH2_PROXY_CLIENT_ID=${AZURE_CLIENT_ID}
+      - OAUTH2_PROXY_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+      - OAUTH2_PROXY_COOKIE_SECRET=${COOKIE_SECRET}
+      - OAUTH2_PROXY_OIDC_ISSUER_URL=https://login.microsoftonline.com/${AZURE_TENANT_ID}/v2.0
+      - OAUTH2_PROXY_EMAIL_DOMAINS=*
+      - OAUTH2_PROXY_HTTP_ADDRESS=0.0.0.0:4180
+      - OAUTH2_PROXY_UPSTREAMS=http://open-webui:8080
 
-  # 2. Ephemeral Linux Desktop (Webtop / KasmVNC)
   webtop:
-    image: lscr.io/linuxserver/webtop:alpine-xfce
+    image: lscr.io/linuxserver/webtop:latest
     container_name: showcase-webtop
+    security_opt:
+      - seccomp:unconfined
+    shm_size: "1gb"
+    ports:
+      - "3000:3000"
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
-    # Ports removed - accessible only via oauth2-proxy
-    shm_size: "1gb"
-    restart: "no"
+      - TZ=Europe/Prague
 
-  # 3. Local AI Engine (Ollama)
   ollama:
     image: ollama/ollama:latest
     container_name: showcase-ollama
-    # Ports removed - strictly internal
-    restart: "no"
-    entrypoint: ["/bin/sh", "-c"]
-    command: ["ollama serve & sleep 5 && ollama pull llama3.2:1b && wait"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
 
-  # 4. AI Web Interface (Open WebUI)
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
     container_name: showcase-webui
     environment:
       - OLLAMA_BASE_URL=http://ollama:11434
-      - WEBUI_AUTH=false
+    volumes:
+      - open-webui_data:/app/backend/data
     depends_on:
       - ollama
-    # Ports removed - accessible only from within the Webtop container
-    restart: "no"
+
+volumes:
+  ollama_data:
+  open-webui_data:

@@ -42,11 +42,11 @@ def StartSandbox(req: func.HttpRequest) -> func.HttpResponse:
     bootstrap_script = bootstrap_script.replace("{{AZURE_CLIENT_SECRET}}", os.environ["ENTRA_CLIENT_SECRET"])
     bootstrap_script = bootstrap_script.replace("{{COOKIE_SECRET}}", os.environ["OAUTH_COOKIE_SECRET"])
 
-    # 3. Create the Server on Scaleway (DEV1-S is the standard cheap instance)
+    # 3. Create the Server on Scaleway 
     server_payload = {
         "name": "showcase-ephemeral-sandbox",
         "project": project_id,
-        "commercial_type": "DEV1-S",
+        "commercial_type": "DEV1-M",
         "image": "ubuntu_jammy", # Standard Ubuntu 22.04 LTS
         "tags": ["showcase-ephemeral"] # Crucial tag for the Budget Guard
     }

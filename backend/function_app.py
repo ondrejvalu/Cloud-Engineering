@@ -47,7 +47,7 @@ def StartSandbox(req: func.HttpRequest) -> func.HttpResponse:
     "name": "showcase-ephemeral-sandbox",
     "project": project_id,
     "commercial_type": "DEV1-M",
-    "image": "ubuntu_jammy",
+    "image": "92012d65-8f1f-4076-8b90-2638b98b1c2c",
     "tags": ["showcase-ephemeral"],
     "volumes": {
         "0": {

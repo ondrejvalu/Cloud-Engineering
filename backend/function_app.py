@@ -49,6 +49,8 @@ def StartSandbox(req: func.HttpRequest) -> func.HttpResponse:
     "commercial_type": "DEV1-M",
     "image": "92012d65-8f1f-4076-8b90-2638b98b1c2c",
     "tags": ["showcase-ephemeral"],
+    "dynamic_ip_required": False,
+    "public_ip": "87373d1b-c76e-4af5-8386-7846d958bf1b", 
     "volumes": {
         "0": {
             "size": 50 * 1000 * 1000 * 1000,  # 50 GB

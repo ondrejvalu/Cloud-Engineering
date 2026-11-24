@@ -1,100 +1,73 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BookStack Cloud Sandbox</title>
-  <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #0f172a;
-      color: #f8fafc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 1rem;
-      box-sizing: border-box;
-    }
-    .card {
-      background: #1e293b;
-      padding: 2rem;
-      border-radius: 12px;
-      max-width: 480px;
-      width: 100%;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
-      text-align: center;
-    }
-    h1 {
-      margin: 0 0 0.75rem 0;
-      font-size: 1.5rem;
-    }
-    p {
-      color: #94a3b8;
-      line-height: 1.5;
-      margin: 0 0 1.25rem 0;
-    }
-    .status {
-      margin: 1.25rem 0;
-      padding: 1rem;
-      border-radius: 8px;
-      background: #0f172a;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 0.92rem;
-      line-height: 1.5;
-      text-align: left;
-      word-break: break-word;
-    }
-    button, a.btn {
-      display: inline-block;
-      width: 100%;
-      box-sizing: border-box;
-      padding: 0.85rem 1rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background-color 0.2s ease;
-    }
-    #startBtn {
-      background: #3b82f6;
-      color: #ffffff;
-    }
-    #startBtn:hover:not(:disabled) {
-      background: #2563eb;
-    }
-    #startBtn:disabled {
-      background: #475569;
-      cursor: not-allowed;
-    }
-    #openBtn {
-      background: #10b981;
-      color: #ffffff;
-      margin-top: 0.75rem;
-      display: none;
-    }
-    #openBtn:hover {
-      background: #059669;
-    }
-  </style>
+  <title>Zero-Trust Ephemeral Workspace</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="card">
-    <h1>BookStack On-Demand Sandbox</h1>
-    <p>Prostředí se spouští na vyžádání a po 10 minutách se samo ukončí přes BudgetGuard.</p>
-    <div class="status" id="statusBox">Kontroluji stav...</div>
-    <button id="startBtn" type="button" disabled>Spustit Sandbox</button>
-    <a id="openBtn" class="btn" href="https://sandbox.fortulab.com" target="_blank" rel="noopener noreferrer">Otevřít BookStack ↗</a>
-  </div>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased">
+
+  <!-- Navigation -->
+  <nav class="bg-white shadow-sm py-4 px-4 md:px-8 flex flex-wrap justify-between items-center gap-4">
+    <div class="font-bold text-lg md:text-xl text-blue-600 tracking-tight">Cloud Engineering Demo</div>
+    <div id="auth-section" class="flex items-center gap-3">
+      <a href="/.auth/login/aad" class="whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow text-sm md:text-base transition-colors">
+        Guest Login
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-5xl mx-auto mt-8 md:mt-12 px-4 md:px-6 mb-20">
+
+    <!-- Hero Section -->
+    <div class="text-center mb-10 md:mb-12">
+      <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">Zero-Trust Ephemeral Workspace</h1>
+      <p class="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+        A showcase project demonstrating secure, identity-driven multi-cloud architecture.
+        Combines Azure Entra ID, ephemeral compute on Scaleway, and automatic cleanup after 10 minutes.
+      </p>
+    </div>
+
+    <!-- Guest Notice (Visible when not logged in) -->
+    <div id="guest-notice" class="bg-white p-6 md:p-8 rounded-xl shadow-md border border-gray-200 text-center">
+      <p class="text-gray-700 font-medium mb-4">
+        Sign in to access the workspace controls and provision a sandbox.
+      </p>
+      <a href="/.auth/login/aad" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow transition-colors">
+        Sign in with Entra ID
+      </a>
+    </div>
+
+    <!-- Interactive Dashboard (Visible ONLY after login) -->
+    <div id="dashboard" class="hidden bg-white p-6 md:p-8 rounded-xl shadow-md border border-gray-200 text-center">
+      <h2 class="text-2xl font-bold mb-3">Workspace Control Panel</h2>
+      <p class="text-gray-600 mb-6">
+        Authentication verified. You can provision a temporary isolated environment.
+        <br class="hidden md:block">
+        <span class="text-red-600 font-semibold">BudgetGuard active:</span> Instance is automatically terminated after 10 minutes.
+      </p>
+
+      <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+        <button id="btn-start" type="button" disabled class="whitespace-nowrap bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-6 md:px-8 rounded-lg shadow-lg transition-colors">
+          Provision Ephemeral Station
+        </button>
+
+        <a id="btn-open" href="https://sandbox.fortulab.com" target="_blank" rel="noopener noreferrer" class="hidden whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow transition-colors">
+          Open BookStack ↗
+        </a>
+      </div>
+
+      <div id="status-box" class="mt-8 hidden p-4 bg-gray-100 rounded border border-gray-200 text-left font-mono text-sm overflow-x-auto"></div>
+    </div>
+
+  </main>
 
   <script>
     const API_BASE = "https://scw-sandbox-api-cz-d4gwghcbhpa6fdec.westeurope-01.azurewebsites.net/api";
-    const statusBox = document.getElementById("statusBox");
-    const startBtn = document.getElementById("startBtn");
-    const openBtn = document.getElementById("openBtn");
+    let isAuthenticated = false;
+    let pollTimer = null;
 
     function formatTime(sec) {
       const safeSec = Math.max(0, Number(sec) || 0);
@@ -103,52 +76,106 @@
       return `${m}:${s.toString().padStart(2, "0")}`;
     }
 
-    async function checkStatus() {
-      try {
-        const res = await fetch(`${API_BASE}/StatusCheck`, { cache: "no-store" });
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        const data = await res.json();
+    function renderStatus(messageHtml, isError = false) {
+      const statusBox = document.getElementById("status-box");
+      statusBox.classList.remove("hidden");
+      statusBox.className = `mt-8 p-4 rounded border text-left font-mono text-sm overflow-x-auto ${
+        isError ? "bg-red-50 border-red-200 text-red-700" : "bg-gray-100 border-gray-200 text-gray-800"
+      }`;
+      statusBox.innerHTML = messageHtml;
+    }
 
-        if (data.active) {
-          startBtn.disabled = true;
-          startBtn.textContent = data.state === "running" ? "Sandbox běží" : "Spouštím sandbox...";
-          statusBox.innerHTML = `Stav: <strong>${data.state}</strong><br>Zbývá do vypnutí: <strong>${formatTime(data.remainingSeconds)}</strong>`;
-          openBtn.style.display = data.state === "running" ? "inline-block" : "none";
+    async function checkAuth() {
+      try {
+        const response = await fetch("/.auth/me", { cache: "no-store" });
+        const payload = await response.json();
+
+        if (payload.clientPrincipal) {
+          isAuthenticated = true;
+          document.getElementById("auth-section").innerHTML = `
+            <span class="font-semibold text-gray-700 text-sm md:text-base hidden sm:inline-block">👤 ${payload.clientPrincipal.userDetails}</span>
+            <a href="/.auth/logout" class="whitespace-nowrap text-gray-500 hover:text-gray-800 underline text-sm md:text-base">Sign out</a>
+          `;
+          document.getElementById("guest-notice").classList.add("hidden");
+          document.getElementById("dashboard").classList.remove("hidden");
+
+          await refreshSandboxStatus();
+          pollTimer = setInterval(refreshSandboxStatus, 5000);
         } else {
-          startBtn.disabled = false;
-          startBtn.textContent = "Spustit Sandbox";
-          statusBox.textContent = "Stav: Vypnuto (připraveno ke startu)";
-          openBtn.style.display = "none";
+          isAuthenticated = false;
+          document.getElementById("guest-notice").classList.remove("hidden");
+          document.getElementById("dashboard").classList.add("hidden");
         }
-      } catch (err) {
-        statusBox.textContent = `Chyba při čtení stavu (${err.message}). Ověřte CORS u Function App.`;
+      } catch (error) {
+        isAuthenticated = false;
+        document.getElementById("guest-notice").classList.remove("hidden");
+        document.getElementById("dashboard").classList.add("hidden");
+        console.error("Auth check failed:", error);
       }
     }
 
-    async function startSandbox() {
-      startBtn.disabled = true;
-      startBtn.textContent = "Spouštím VM...";
-      statusBox.textContent = "Odesílám požadavek na StartSandbox...";
+    async function refreshSandboxStatus() {
+      if (!isAuthenticated) return;
+
+      const btnStart = document.getElementById("btn-start");
+      const btnOpen = document.getElementById("btn-open");
+
+      try {
+        const res = await fetch(`${API_BASE}/StatusCheck`, { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (data.active) {
+          btnStart.disabled = true;
+          btnStart.textContent = data.state === "running" ? "Sandbox Running" : "Starting Sandbox...";
+          btnOpen.classList.toggle("hidden", data.state !== "running");
+          renderStatus(
+            `<p>State: <strong>${data.state}</strong> | Remaining: <strong>${formatTime(data.remainingSeconds)}</strong></p>`
+          );
+        } else {
+          btnStart.disabled = false;
+          btnStart.textContent = "Provision Ephemeral Station";
+          btnOpen.classList.add("hidden");
+          renderStatus(`<p class="text-gray-600">Sandbox is stopped. Click to provision a new instance (10-minute limit).</p>`);
+        }
+      } catch (err) {
+        renderStatus(`<p>[ERROR] Failed to load status (${err.message}). Check CORS settings.</p>`, true);
+      }
+    }
+
+    document.getElementById("btn-start").addEventListener("click", async () => {
+      if (!isAuthenticated) {
+        window.location.href = "/.auth/login/aad";
+        return;
+      }
+
+      const btnStart = document.getElementById("btn-start");
+      btnStart.disabled = true;
+      btnStart.textContent = "Starting VM...";
+      renderStatus(`
+        <p class="text-blue-700">[INFO] Sending request to StartSandbox...</p>
+        <p class="text-gray-600">[INFO] Orchestrating Scaleway instance...</p>
+      `);
+
       try {
         const res = await fetch(`${API_BASE}/StartSandbox`, { method: "POST" });
         const data = await res.json().catch(() => ({}));
         if (!res.ok && res.status !== 202) {
           throw new Error(data.error || `HTTP ${res.status}`);
         }
-        statusBox.innerHTML = `Požadavek přijat (<strong>${data.status || res.status}</strong>).<br>Server ID: <code>${data.serverId || "-"}</code>`;
-        setTimeout(checkStatus, 2500);
+        renderStatus(`
+          <p class="text-green-700">[OK] Request accepted (${data.status || res.status}).</p>
+          <p class="text-gray-700">[INFO] Server ID: <code>${data.serverId || "-"}</code></p>
+        `);
+        setTimeout(refreshSandboxStatus, 2500);
       } catch (err) {
-        statusBox.textContent = `Nepodařilo se spustit sandbox: ${err.message}`;
-        startBtn.disabled = false;
-        startBtn.textContent = "Spustit Sandbox";
+        renderStatus(`<p>[ERROR] StartSandbox failed: ${err.message}</p>`, true);
+        btnStart.disabled = false;
+        btnStart.textContent = "Provision Ephemeral Station";
       }
-    }
+    });
 
-    startBtn.addEventListener("click", startSandbox);
-    checkStatus();
-    setInterval(checkStatus, 5000);
+    checkAuth();
   </script>
 </body>
 </html>

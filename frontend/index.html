@@ -5,26 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BookStack Cloud Sandbox</title>
   <style>
-    body { font-family: system-ui, sans-serif; background: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-    .card { background: #1e293b; padding: 2rem; border-radius: 12px; max-width: 440px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.4); text-align: center; }
-    h1 { margin-top: 0; font-size: 1.5rem; }
-    p { color: #94a3b8; line-height: 1.5; }
-    .status { margin: 1.5rem 0; padding: 1rem; border-radius: 8px; background: #0f172a; font-family: monospace; font-size: 0.95rem; }
-    button, a.btn { display: inline-block; width: 100%; box-sizing: border-box; padding: 0.85rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: 0.2s; }
-    #startBtn { background: #3b82f6; color: white; }
-    #startBtn:hover:not(:disabled) { background: #2563eb; }
-    #startBtn:disabled { background: #475569; cursor: not-allowed; }
-    #openBtn { background: #10b981; color: white; margin-top: 0.75rem; display: none; }
-    #openBtn:hover { background: #059669; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+    .card {
+      background: #1e293b;
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+      text-align: center;
+    }
+    h1 {
+      margin: 0 0 0.75rem 0;
+      font-size: 1.5rem;
+    }
+    p {
+      color: #94a3b8;
+      line-height: 1.5;
+      margin: 0 0 1.25rem 0;
+    }
+    .status {
+      margin: 1.25rem 0;
+      padding: 1rem;
+      border-radius: 8px;
+      background: #0f172a;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      text-align: left;
+      word-break: break-word;
+    }
+    button, a.btn {
+      display: inline-block;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.85rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.2s ease;
+    }
+    #startBtn {
+      background: #3b82f6;
+      color: #ffffff;
+    }
+    #startBtn:hover:not(:disabled) {
+      background: #2563eb;
+    }
+    #startBtn:disabled {
+      background: #475569;
+      cursor: not-allowed;
+    }
+    #openBtn {
+      background: #10b981;
+      color: #ffffff;
+      margin-top: 0.75rem;
+      display: none;
+    }
+    #openBtn:hover {
+      background: #059669;
+    }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>BookStack On-Demand Sandbox</h1>
-    <p>Prostředí se spouští na vyžádání ze Zero-Secret Golden Image a po 10 minutách se samo uklidí.</p>
+    <p>Prostředí se spouští na vyžádání a po 10 minutách se samo ukončí přes BudgetGuard.</p>
     <div class="status" id="statusBox">Kontroluji stav...</div>
-    <button id="startBtn" onclick="startSandbox()" disabled>Spustit Sandbox</button>
-    <a id="openBtn" class="btn" href="http://51.15.128.128" target="_blank">Otevřít BookStack ↗</a>
+    <button id="startBtn" type="button" disabled>Spustit Sandbox</button>
+    <a id="openBtn" class="btn" href="https://sandbox.fortulab.com" target="_blank" rel="noopener noreferrer">Otevřít BookStack ↗</a>
   </div>
 
   <script>
@@ -34,19 +97,23 @@
     const openBtn = document.getElementById("openBtn");
 
     function formatTime(sec) {
-      const m = Math.floor(sec / 60);
-      const s = sec % 60;
+      const safeSec = Math.max(0, Number(sec) || 0);
+      const m = Math.floor(safeSec / 60);
+      const s = safeSec % 60;
       return `${m}:${s.toString().padStart(2, "0")}`;
     }
 
     async function checkStatus() {
       try {
-        const res = await fetch(`${API_BASE}/StatusCheck`);
+        const res = await fetch(`${API_BASE}/StatusCheck`, { cache: "no-store" });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
         const data = await res.json();
 
         if (data.active) {
           startBtn.disabled = true;
-          startBtn.textContent = "Sandbox běží";
+          startBtn.textContent = data.state === "running" ? "Sandbox běží" : "Spouštím sandbox...";
           statusBox.innerHTML = `Stav: <strong>${data.state}</strong><br>Zbývá do vypnutí: <strong>${formatTime(data.remainingSeconds)}</strong>`;
           openBtn.style.display = data.state === "running" ? "inline-block" : "none";
         } else {
@@ -56,23 +123,30 @@
           openBtn.style.display = "none";
         }
       } catch (err) {
-        statusBox.textContent = "Chyba komunikace s API (zkontrolujte CORS).";
+        statusBox.textContent = `Chyba při čtení stavu (${err.message}). Ověřte CORS u Function App.`;
       }
     }
 
     async function startSandbox() {
       startBtn.disabled = true;
-      startBtn.textContent = "Startuji VM...";
-      statusBox.textContent = "Odesílám požadavek do Scaleway (cca 60–90 s do naběhnutí)...";
+      startBtn.textContent = "Spouštím VM...";
+      statusBox.textContent = "Odesílám požadavek na StartSandbox...";
       try {
-        await fetch(`${API_BASE}/StartSandbox`, { method: "POST" });
-        setTimeout(checkStatus, 3000);
+        const res = await fetch(`${API_BASE}/StartSandbox`, { method: "POST" });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok && res.status !== 202) {
+          throw new Error(data.error || `HTTP ${res.status}`);
+        }
+        statusBox.innerHTML = `Požadavek přijat (<strong>${data.status || res.status}</strong>).<br>Server ID: <code>${data.serverId || "-"}</code>`;
+        setTimeout(checkStatus, 2500);
       } catch (err) {
-        statusBox.textContent = "Nepodařilo se spustit sandbox.";
+        statusBox.textContent = `Nepodařilo se spustit sandbox: ${err.message}`;
         startBtn.disabled = false;
+        startBtn.textContent = "Spustit Sandbox";
       }
     }
 
+    startBtn.addEventListener("click", startSandbox);
     checkStatus();
     setInterval(checkStatus, 5000);
   </script>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zero-Trust Ephemeral Workspace</title>
+  <title>Budget Multi-Cloud Sandbox</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans antialiased">
@@ -11,11 +11,7 @@
   <!-- Navigation -->
   <nav class="bg-white shadow-sm py-4 px-4 md:px-8 flex flex-wrap justify-between items-center gap-4">
     <div class="font-bold text-lg md:text-xl text-blue-600 tracking-tight">Cloud Engineering Demo</div>
-    <div id="auth-section" class="flex items-center gap-3">
-      <a href="/.auth/login/aad" class="whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow text-sm md:text-base transition-colors">
-        Guest Login
-      </a>
-    </div>
+    <div id="auth-section" class="flex items-center gap-3"></div>
   </nav>
 
   <!-- Main Content -->
@@ -23,17 +19,35 @@
 
     <!-- Hero Section -->
     <div class="text-center mb-10 md:mb-12">
-      <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">Zero-Trust Ephemeral Workspace</h1>
-      <p class="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-        A showcase project demonstrating secure, identity-driven multi-cloud architecture.
-        Combines Azure Entra ID, ephemeral compute on Scaleway, and automatic cleanup after 10 minutes.
+      <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">Budget Multi-Cloud Sandbox</h1>
+      <p class="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed mb-8">
+        A showcase project demonstrating a cost-effective multi-cloud architecture.
+        Identity and access are managed by Microsoft Entra ID, while on-demand compute runs on Scaleway
+        with automatic shutdown after 10 minutes to keep cloud costs near zero.
+      </p>
+
+      <!-- Architecture Diagram -->
+      <div class="max-w-4xl mx-auto bg-white p-2 md:p-4 rounded-xl shadow-md border border-gray-200">
+        <img src="diagram.png" alt="Budget Multi-Cloud Architecture Diagram" class="w-full h-auto rounded-lg object-contain" />
+      </div>
+    </div>
+
+    <!-- Usage Instructions -->
+    <div class="max-w-3xl mx-auto mb-10 bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-gray-600 text-sm md:text-base leading-relaxed">
+      <p>
+        To launch the sandbox, sign in using the guest account credentials provided to you. If you don't have credentials yet,
+        feel free to request access via my
+        <a href="https://www.linkedin.com/in/ondřej-valů-545540155" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">LinkedIn profile</a>.
+        Once started, please note that the application can take <strong>up to a minute</strong> to boot and become reachable.
+        All project documentation and development details can then be viewed in the <strong>Books</strong> section at
+        <a href="https://sandbox.fortulab.com/books" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">sandbox.fortulab.com/books</a>.
       </p>
     </div>
 
     <!-- Guest Notice (Visible when not logged in) -->
     <div id="guest-notice" class="bg-white p-6 md:p-8 rounded-xl shadow-md border border-gray-200 text-center">
       <p class="text-gray-700 font-medium mb-4">
-        Sign in to access the workspace controls and provision a sandbox.
+        Sign in to access the control panel and start the sandbox.
       </p>
       <a href="/.auth/login/aad" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow transition-colors">
         Sign in with Entra ID
@@ -42,20 +56,20 @@
 
     <!-- Interactive Dashboard (Visible ONLY after login) -->
     <div id="dashboard" class="hidden bg-white p-6 md:p-8 rounded-xl shadow-md border border-gray-200 text-center">
-      <h2 class="text-2xl font-bold mb-3">Workspace Control Panel</h2>
+      <h2 class="text-2xl font-bold mb-3">Sandbox Control Panel</h2>
       <p class="text-gray-600 mb-6">
-        Authentication verified. You can provision a temporary isolated environment.
+        Authentication verified. You can start the on-demand BookStack environment below.
         <br class="hidden md:block">
-        <span class="text-red-600 font-semibold">BudgetGuard active:</span> Instance is automatically terminated after 10 minutes.
+        <span class="text-red-600 font-semibold">BudgetGuard active:</span> The instance is automatically terminated after 10 minutes.
       </p>
 
       <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
         <button id="btn-start" type="button" disabled class="whitespace-nowrap bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-6 md:px-8 rounded-lg shadow-lg transition-colors">
-          Provision Ephemeral Station
+          Start Sandbox
         </button>
 
-        <a id="btn-open" href="https://sandbox.fortulab.com" target="_blank" rel="noopener noreferrer" class="hidden whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow transition-colors">
-          Open BookStack ↗
+        <a id="btn-open" href="https://sandbox.fortulab.com/books" target="_blank" rel="noopener noreferrer" class="hidden whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow transition-colors">
+          Open BookStack (Books) ↗
         </a>
       </div>
 
@@ -130,13 +144,14 @@
           btnStart.textContent = data.state === "running" ? "Sandbox Running" : "Starting Sandbox...";
           btnOpen.classList.toggle("hidden", data.state !== "running");
           renderStatus(
-            `<p>State: <strong>${data.state}</strong> | Remaining: <strong>${formatTime(data.remainingSeconds)}</strong></p>`
+            `<p>State: <strong>${data.state}</strong> | Remaining: <strong>${formatTime(data.remainingSeconds)}</strong></p>
+             <p class="text-gray-500 mt-1">Note: BookStack may take up to a minute to finish loading after the VM starts.</p>`
           );
         } else {
           btnStart.disabled = false;
-          btnStart.textContent = "Provision Ephemeral Station";
+          btnStart.textContent = "Start Sandbox";
           btnOpen.classList.add("hidden");
-          renderStatus(`<p class="text-gray-600">Sandbox is stopped. Click to provision a new instance (10-minute limit).</p>`);
+          renderStatus(`<p class="text-gray-600">Sandbox is stopped. Click to start a new instance (10-minute limit).</p>`);
         }
       } catch (err) {
         renderStatus(`<p>[ERROR] Failed to load status (${err.message}). Check CORS settings.</p>`, true);
@@ -154,7 +169,7 @@
       btnStart.textContent = "Starting VM...";
       renderStatus(`
         <p class="text-blue-700">[INFO] Sending request to StartSandbox...</p>
-        <p class="text-gray-600">[INFO] Orchestrating Scaleway instance...</p>
+        <p class="text-gray-600">[INFO] Booting Scaleway instance (this can take up to 1 minute)...</p>
       `);
 
       try {
@@ -171,11 +186,9 @@
       } catch (err) {
         renderStatus(`<p>[ERROR] StartSandbox failed: ${err.message}</p>`, true);
         btnStart.disabled = false;
-        btnStart.textContent = "Provision Ephemeral Station";
+        btnStart.textContent = "Start Sandbox";
       }
     });
 
     checkAuth();
-  </script>
-</body>
-</html>
+  </script
